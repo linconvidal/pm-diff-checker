@@ -136,26 +136,50 @@ export class ExportControlsComponent {
 
     markdown += `## Detailed Changes
 
-\`\`\`diff
-${diffResult.oldCollection}
----
-${diffResult.newCollection}
-\`\`\`
-
-## Change Patches
-
 `
 
-    if (diffResult.patches) {
-      diffResult.patches.forEach((patch, index) => {
-        const changeType = patch.added ? 'Added' : patch.removed ? 'Removed' : 'Modified'
-        markdown += `### Change ${index + 1}: ${changeType}
+    // Process patches to show actual differences
+    if (diffResult.patches && diffResult.patches.length > 0) {
+      markdown += `\`\`\`diff\n`
+      
+      diffResult.patches.forEach((patch) => {
+        const lines = patch.value.split('\n')
+        const prefix = patch.added ? '+' : patch.removed ? '-' : ' '
+        
+        lines.forEach(line => {
+          if (line) {
+            markdown += `${prefix} ${line}\n`
+          }
+        })
+      })
+      
+      markdown += `\`\`\`\n\n`
+    } else {
+      markdown += `*No differences found between the collections.*\n\n`
+    }
 
-\`\`\`
-${patch.value}
-\`\`\`
-
-`
+    // Add individual changes section for better readability
+    if (diffResult.patches && diffResult.patches.length > 0) {
+      markdown += `## Individual Changes\n\n`
+      
+      let changeIndex = 1
+      diffResult.patches.forEach((patch) => {
+        if (patch.added || patch.removed) {
+          const changeType = patch.added ? '✅ Added' : '❌ Removed'
+          
+          markdown += `### ${changeIndex}. ${changeType}\n\n`
+          
+          // Try to parse and format the value for better readability
+          try {
+            const parsed = JSON.parse(patch.value)
+            markdown += `\`\`\`json\n${JSON.stringify(parsed, null, 2)}\n\`\`\`\n\n`
+          } catch {
+            // If not JSON, show as plain text
+            markdown += `\`\`\`\n${patch.value}\n\`\`\`\n\n`
+          }
+          
+          changeIndex++
+        }
       })
     }
 
