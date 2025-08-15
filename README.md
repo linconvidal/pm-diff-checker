@@ -39,7 +39,7 @@ Visit the live application: [https://your-username.github.io/pm-diff-checker/](h
 ```bash
 # Clone the repository
 git clone https://github.com/your-username/pm-diff-checker.git
-cd pm-diff-checker/postman-diff
+cd pm-diff-checker
 
 # Install dependencies
 npm install
@@ -87,7 +87,7 @@ npm run preview
 
 ### Project Structure
 ```
-postman-diff/
+pm-diff-checker/
 ├── src/
 │   ├── core/           # Normalization and diff algorithms
 │   │   ├── parse.ts       # Collection parsing and validation
