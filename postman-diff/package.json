@@ -1,0 +1,27 @@
+{
+  "name": "postman-diff",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "format": "prettier --write src/**/*.{ts,js,json,css,md}"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/typography": "^0.5.16",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "typescript": "~5.8.3",
+    "vite": "^7.1.2"
+  },
+  "dependencies": {
+    "@types/diff": "^7.0.2",
+    "diff": "^8.0.2",
+    "diff2html": "^3.4.52",
+    "prettier": "^3.6.2"
+  }
+}
