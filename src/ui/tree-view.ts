@@ -108,14 +108,166 @@ export class TreeViewComponent {
   }
 
   /**
-   * Updates tree with diff information
+   * Updates tree with diff information - shows only changed items
    */
   updateWithDiff(oldCollection: NormalizedCollection, newCollection: NormalizedCollection): void {
-    const oldTree = this.buildTree(oldCollection, 'old')
-    const newTree = this.buildTree(newCollection, 'new')
+    // Build maps of ALL items including folders
+    const oldItems = this.flattenItems(oldCollection.items)
+    const newItems = this.flattenItems(newCollection.items)
     
-    this.tree = this.mergeTrees(oldTree, newTree)
+    const oldMap = new Map(oldItems.map(item => [item.id, item]))
+    const newMap = new Map(newItems.map(item => [item.id, item]))
+    
+    const changedItems: any[] = []
+    
+    // Find removed items (including folders)
+    oldMap.forEach((item, id) => {
+      if (!newMap.has(id)) {
+        changedItems.push({ ...item, changeType: 'removed' })
+      }
+    })
+    
+    // Find added and modified items (including folders with tests/scripts)
+    newMap.forEach((item, id) => {
+      if (!oldMap.has(id)) {
+        changedItems.push({ ...item, changeType: 'added' })
+      } else {
+        const oldItem = oldMap.get(id)!
+        if (this.hasItemChanged(oldItem, item)) {
+          const changes = this.getItemChanges(oldItem, item)
+          changedItems.push({ ...item, changeType: 'modified', changeDetails: changes })
+        }
+      }
+    })
+    
+    // Now build tree structure showing only changed items with their paths
+    this.tree = this.buildTreeFromChangedItems(changedItems, newCollection.info.name)
     this.render()
+  }
+  
+  private buildTreeFromChangedItems(items: any[], collectionName: string): TreeNode[] {
+    if (items.length === 0) {
+      return [{
+        id: 'no-changes',
+        name: 'No changes detected',
+        type: 'collection',
+        expanded: true
+      }]
+    }
+    
+    // Group items by their parent path
+    const grouped = new Map<string, any[]>()
+    
+    items.forEach(item => {
+      const parentPath = item.parentPath || ''
+      if (!grouped.has(parentPath)) {
+        grouped.set(parentPath, [])
+      }
+      grouped.get(parentPath)!.push(item)
+    })
+    
+    // Count changes by type
+    const addedCount = items.filter(i => i.changeType === 'added').length
+    const removedCount = items.filter(i => i.changeType === 'removed').length
+    const modifiedCount = items.filter(i => i.changeType === 'modified').length
+    
+    // Build tree structure
+    const rootNode: TreeNode = {
+      id: 'changed-items',
+      name: `${collectionName} (+${addedCount} -${removedCount} ~${modifiedCount})`,
+      type: 'collection',
+      expanded: true,
+      children: [],
+      changeType: 'modified'
+    }
+    
+    // Add grouped items
+    grouped.forEach((groupItems, path) => {
+      if (path) {
+        // Create folder node for this path
+        const folderNode: TreeNode = {
+          id: `folder-${path}`,
+          name: path,
+          type: 'folder',
+          expanded: true,
+          children: groupItems.map(item => this.createTreeNode(item)),
+          changeType: 'modified'
+        }
+        rootNode.children!.push(folderNode)
+      } else {
+        // Root level items
+        groupItems.forEach(item => {
+          rootNode.children!.push(this.createTreeNode(item))
+        })
+      }
+    })
+    
+    return [rootNode]
+  }
+  
+  private createTreeNode(item: any): TreeNode {
+    return {
+      id: item.id,
+      name: item.name,
+      type: item.children ? 'folder' : 'request',
+      method: item.method,
+      changeType: item.changeType,
+      changeDetails: item.changeDetails,
+      expanded: false
+    } as any
+  }
+  
+  private flattenItems(items: NormalizedItem[], parentPath: string = ''): any[] {
+    const result: any[] = []
+    items.forEach(item => {
+      const path = parentPath ? `${parentPath}/${item.name}` : item.name
+      result.push({ ...item, path, parentPath })
+      if (item.children) {
+        result.push(...this.flattenItems(item.children, path))
+      }
+    })
+    return result
+  }
+  
+  private hasItemChanged(oldItem: any, newItem: any): boolean {
+    // Compare scripts properly (they can be strings or arrays)
+    const oldTests = Array.isArray(oldItem.tests) ? oldItem.tests.join('\n') : (oldItem.tests || '')
+    const newTests = Array.isArray(newItem.tests) ? newItem.tests.join('\n') : (newItem.tests || '')
+    const oldPre = Array.isArray(oldItem.prerequest) ? oldItem.prerequest.join('\n') : (oldItem.prerequest || '')
+    const newPre = Array.isArray(newItem.prerequest) ? newItem.prerequest.join('\n') : (newItem.prerequest || '')
+    
+    // For folders, check if their tests or prerequest scripts changed
+    if (oldItem.children && newItem.children) {
+      // Folder-level scripts apply to all children
+      return oldTests !== newTests || oldPre !== newPre
+    }
+    
+    // For endpoints, check all properties
+    return oldItem.method !== newItem.method ||
+           oldItem.url !== newItem.url ||
+           oldItem.body !== newItem.body ||
+           JSON.stringify(oldItem.headers || {}) !== JSON.stringify(newItem.headers || {}) ||
+           oldTests !== newTests ||
+           oldPre !== newPre
+  }
+  
+  private getItemChanges(oldItem: any, newItem: any): string {
+    const changes: string[] = []
+    
+    // Compare scripts properly (they can be strings or arrays)
+    const oldTests = Array.isArray(oldItem.tests) ? oldItem.tests.join('\n') : (oldItem.tests || '')
+    const newTests = Array.isArray(newItem.tests) ? newItem.tests.join('\n') : (newItem.tests || '')
+    const oldPre = Array.isArray(oldItem.prerequest) ? oldItem.prerequest.join('\n') : (oldItem.prerequest || '')
+    const newPre = Array.isArray(newItem.prerequest) ? newItem.prerequest.join('\n') : (newItem.prerequest || '')
+    
+    if (oldItem.url !== newItem.url) changes.push('URL')
+    if (oldItem.method !== newItem.method) changes.push('Method')
+    if (oldItem.body !== newItem.body) changes.push('Body')
+    if (JSON.stringify(oldItem.headers || {}) !== JSON.stringify(newItem.headers || {})) changes.push('Headers')
+    if (oldTests !== newTests) changes.push('Tests')
+    if (oldPre !== newPre) changes.push('Pre-request')
+    
+    return changes.join(', ')
   }
 
   private buildTree(collection: NormalizedCollection, context: 'old' | 'new' | 'diff'): TreeNode[] {
@@ -143,32 +295,6 @@ export class TreeViewComponent {
     }))
   }
 
-  private mergeTrees(oldTree: TreeNode[], newTree: TreeNode[]): TreeNode[] {
-    // Simplified merge - in a real implementation, this would be more sophisticated
-    const merged: TreeNode[] = []
-    const seenIds = new Set<string>()
-
-    // Add all nodes from new tree (added/modified)
-    newTree.forEach(node => {
-      merged.push({
-        ...node,
-        changeType: 'added' // Simplified - would need proper diff logic
-      })
-      seenIds.add(node.id)
-    })
-
-    // Add nodes only in old tree (removed)
-    oldTree.forEach(node => {
-      if (!seenIds.has(node.id)) {
-        merged.push({
-          ...node,
-          changeType: 'removed'
-        })
-      }
-    })
-
-    return merged
-  }
 
   private render(): void {
     const contentElement = this.element.querySelector('.max-h-96') as HTMLElement
@@ -191,14 +317,25 @@ export class TreeViewComponent {
     const selectedClass = node.selected ? 'bg-blue-100 dark:bg-blue-900/30' : 'hover:bg-zinc-100 dark:hover:bg-zinc-800'
     const indent = level * 16
 
+    // Determine icon based on change type and node type
     let icon = ''
+    let changeClass = ''
+    
     if (node.type === 'collection') {
-      icon = '📁'
+      icon = '📊'
+      changeClass = 'text-blue-600 dark:text-blue-400'
     } else if (node.type === 'folder') {
-      icon = '📂'
-    } else if (node.type === 'request') {
-      const methodClass = node.method ? `method-badge ${node.method.toLowerCase()}` : 'method-badge get'
-      icon = `<span class="${methodClass}">${node.method || 'GET'}</span>`
+      icon = '📁'
+      changeClass = 'text-zinc-600 dark:text-zinc-400'
+    } else if (node.changeType === 'added') {
+      changeClass = 'text-green-600 dark:text-green-400'
+      icon = '➕'
+    } else if (node.changeType === 'removed') {
+      changeClass = 'text-red-600 dark:text-red-400'
+      icon = '➖'
+    } else if (node.changeType === 'modified') {
+      changeClass = 'text-yellow-600 dark:text-yellow-400'
+      icon = '🔄'
     }
 
     let toggleButton = ''
@@ -207,17 +344,16 @@ export class TreeViewComponent {
       toggleButton = `<button class="tree-toggle w-4 h-4 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 mr-2 text-xs transition-colors duration-200">${toggleIcon}</button>`
     }
 
-    let changeIndicator = ''
-    if (this.options.showChangeIndicators && node.changeType) {
-      const indicators: Record<string, string> = {
-        added: '+',
-        removed: '-',
-        modified: '~',
-        unchanged: ''
-      }
-      if (indicators[node.changeType]) {
-        changeIndicator = `<span class="change-indicator change-${node.changeType}">${indicators[node.changeType]}</span>`
-      }
+    // Show change details
+    let changeDetails = ''
+    if ((node as any).changeDetails) {
+      changeDetails = `<span class="text-xs text-zinc-500 dark:text-zinc-400 ml-2">(${(node as any).changeDetails})</span>`
+    }
+    
+    // Show method for endpoints
+    let methodBadge = ''
+    if (node.type === 'request' && node.method) {
+      methodBadge = `<span class="text-xs font-mono text-zinc-600 dark:text-zinc-400 ml-2">[${node.method}]</span>`
     }
 
     let childrenHtml = ''
@@ -225,13 +361,19 @@ export class TreeViewComponent {
       childrenHtml = `<div class="border-l border-zinc-200 dark:border-zinc-700 ml-3">${this.renderNodes(node.children!, level + 1)}</div>`
     }
 
+    // Create clickable link to section
+    const nodeId = node.changeType === 'added' ? 'added-section' : 
+                   node.changeType === 'removed' ? 'removed-section' : 
+                   node.changeType === 'modified' ? 'modified-section' : ''
+
     return `
-      <div class="my-0.5 rounded transition-colors duration-150 ${selectedClass}" data-node-id="${node.id}">
+      <div class="tree-node my-0.5 rounded transition-colors duration-150 ${selectedClass}" data-node-id="${node.id}" data-section="${nodeId}">
         <div class="flex items-center py-1 px-2 cursor-pointer min-h-[28px]" style="padding-left: ${indent + 8}px">
           ${toggleButton}
-          <span class="mr-2 text-sm flex-shrink-0">${icon}</span>
+          <span class="mr-2 text-sm flex-shrink-0 ${changeClass}">${icon}</span>
           <span class="flex-1 text-zinc-900 dark:text-zinc-100 text-sm truncate">${node.name}</span>
-          ${changeIndicator}
+          ${methodBadge}
+          ${changeDetails}
         </div>
         ${childrenHtml}
       </div>
@@ -259,6 +401,28 @@ export class TreeViewComponent {
   }
 
   private selectNode(node: TreeNode): void {
+    // Navigate to the specific item in the diff viewer
+    let targetId = ''
+    if (node.changeType === 'added') {
+      targetId = `added-${node.id}`
+    } else if (node.changeType === 'removed') {
+      targetId = `removed-${node.id}`
+    } else if (node.changeType === 'modified') {
+      targetId = `modified-${node.id}`
+    }
+    
+    if (targetId) {
+      const targetElement = document.getElementById(targetId)
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        // Highlight briefly
+        targetElement.style.backgroundColor = '#fbbf24'
+        setTimeout(() => {
+          targetElement.style.backgroundColor = ''
+        }, 1000)
+      }
+    }
+    
     // Clear previous selection
     if (this.selectedNode) {
       this.selectedNode.selected = false

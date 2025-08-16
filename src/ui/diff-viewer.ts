@@ -36,12 +36,12 @@ export class DiffViewerComponent {
     const contentElement = this.element.querySelector('.diff-content') as HTMLElement
     const statsElement = this.element.querySelector('.diff-stats') as HTMLElement
 
-    // Show statistics
+    // Show statistics with navigation
     const stats = this.calculateStats(diffResult)
     statsElement.innerHTML = `
-      <span class="stat added">+${stats.added} added</span>
-      <span class="stat removed">-${stats.removed} removed</span>
-      <span class="stat modified">~${stats.modified} modified</span>
+      <a href="#added-section" class="stat added" style="text-decoration: none; cursor: pointer;">+${stats.added} added</a>
+      <a href="#removed-section" class="stat removed" style="text-decoration: none; cursor: pointer;">-${stats.removed} removed</a>
+      <a href="#modified-section" class="stat modified" style="text-decoration: none; cursor: pointer;">~${stats.modified} modified</a>
     `
 
     // Show diff HTML
@@ -49,6 +49,17 @@ export class DiffViewerComponent {
 
     // Add syntax highlighting and styling
     this.enhanceDiffDisplay(contentElement)
+    
+    // Add smooth scrolling for navigation
+    statsElement.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault()
+        const target = document.querySelector(link.getAttribute('href')!)
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        }
+      })
+    })
   }
 
   private calculateStats(diffResult: DiffResult): {

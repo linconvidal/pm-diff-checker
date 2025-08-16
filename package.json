@@ -20,8 +20,11 @@
   },
   "dependencies": {
     "@types/diff": "^7.0.2",
+    "@types/prismjs": "^1.26.5",
     "diff": "^8.0.2",
+    "diff-match-patch": "^1.0.5",
     "diff2html": "^3.4.52",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "prismjs": "^1.30.0"
   }
 }

@@ -104,10 +104,10 @@ export class ExportControlsComponent {
   }
 
   private generateMarkdownReport(): string {
-    const { diffResult, oldCollection, newCollection } = this.currentData
+    const { oldCollection, newCollection } = this.currentData
     
-    if (!diffResult) {
-      return '# Postman Collection Diff Report\n\nNo diff data available.'
+    if (!oldCollection || !newCollection) {
+      return '# Postman Collection Diff Report\n\nPlease load both collections to generate a report.'
     }
 
     const oldName = oldCollection?.info.name || 'Old Collection'
@@ -123,65 +123,61 @@ export class ExportControlsComponent {
 
 `
 
-    // Add statistics if available
-    if (diffResult.patches) {
-      const stats = this.calculateStats(diffResult.patches)
-      markdown += `
-- **Added:** ${stats.added} items
-- **Removed:** ${stats.removed} items  
-- **Modified:** ${stats.modified} items
-
-`
-    }
-
-    markdown += `## Detailed Changes
+    // Compare collections structurally
+    const changes = this.compareCollections(oldCollection, newCollection)
+    
+    markdown += `
+- **Added:** ${changes.added.length} items
+- **Removed:** ${changes.removed.length} items  
+- **Modified:** ${changes.modified.length} items
 
 `
 
-    // Process patches to show actual differences
-    if (diffResult.patches && diffResult.patches.length > 0) {
-      markdown += `\`\`\`diff\n`
-      
-      diffResult.patches.forEach((patch) => {
-        const lines = patch.value.split('\n')
-        const prefix = patch.added ? '+' : patch.removed ? '-' : ' '
-        
-        lines.forEach(line => {
-          if (line) {
-            markdown += `${prefix} ${line}\n`
-          }
-        })
-      })
-      
-      markdown += `\`\`\`\n\n`
-    } else {
-      markdown += `*No differences found between the collections.*\n\n`
-    }
-
-    // Add individual changes section for better readability
-    if (diffResult.patches && diffResult.patches.length > 0) {
-      markdown += `## Individual Changes\n\n`
-      
-      let changeIndex = 1
-      diffResult.patches.forEach((patch) => {
-        if (patch.added || patch.removed) {
-          const changeType = patch.added ? '✅ Added' : '❌ Removed'
-          
-          markdown += `### ${changeIndex}. ${changeType}\n\n`
-          
-          // Try to parse and format the value for better readability
-          try {
-            const parsed = JSON.parse(patch.value)
-            markdown += `\`\`\`json\n${JSON.stringify(parsed, null, 2)}\n\`\`\`\n\n`
-          } catch {
-            // If not JSON, show as plain text
-            markdown += `\`\`\`\n${patch.value}\n\`\`\`\n\n`
-          }
-          
-          changeIndex++
+    // Show added items
+    if (changes.added.length > 0) {
+      markdown += `## ✅ Added Items\n\n`
+      changes.added.forEach(item => {
+        markdown += `- **${item.name}**`
+        if (item.method && item.url) {
+          markdown += ` - \`${item.method} ${item.url}\``
         }
+        markdown += '\n'
       })
+      markdown += '\n'
     }
+
+    // Show removed items
+    if (changes.removed.length > 0) {
+      markdown += `## ❌ Removed Items\n\n`
+      changes.removed.forEach(item => {
+        markdown += `- **${item.name}**`
+        if (item.method && item.url) {
+          markdown += ` - \`${item.method} ${item.url}\``
+        }
+        markdown += '\n'
+      })
+      markdown += '\n'
+    }
+
+    // Show modified items
+    if (changes.modified.length > 0) {
+      markdown += `## 🔄 Modified Items\n\n`
+      changes.modified.forEach(item => {
+        markdown += `- **${item.name}**`
+        if (item.method && item.url) {
+          markdown += ` - \`${item.method} ${item.url}\``
+        }
+        if (item.changes && item.changes.length > 0) {
+          markdown += '\n  Changes:\n'
+          item.changes.forEach((change: string) => {
+            markdown += `  - ${change}\n`
+          })
+        }
+        markdown += '\n'
+      })
+      markdown += '\n'
+    }
+
 
     markdown += `
 ---
@@ -191,16 +187,79 @@ export class ExportControlsComponent {
     return markdown
   }
 
-  private calculateStats(patches: any[]): { added: number, removed: number, modified: number } {
-    let added = 0, removed = 0, modified = 0
-    
-    patches.forEach(patch => {
-      if (patch.added) added++
-      else if (patch.removed) removed++
-      else modified++
+  private compareCollections(oldCollection: any, newCollection: any): {
+    added: any[],
+    removed: any[],
+    modified: any[]
+  } {
+    const added: any[] = []
+    const removed: any[] = []
+    const modified: any[] = []
+
+    if (!oldCollection || !newCollection) {
+      return { added, removed, modified }
+    }
+
+    const oldItems = this.flattenItems(oldCollection.items || [])
+    const newItems = this.flattenItems(newCollection.items || [])
+
+    // Create maps for easier comparison
+    const oldMap = new Map(oldItems.map(item => [item.id, item]))
+    const newMap = new Map(newItems.map(item => [item.id, item]))
+
+    // Find removed items
+    oldMap.forEach((item, id) => {
+      if (!newMap.has(id)) {
+        removed.push(item)
+      }
     })
-    
+
+    // Find added and modified items
+    newMap.forEach((item, id) => {
+      if (!oldMap.has(id)) {
+        added.push(item)
+      } else {
+        const oldItem = oldMap.get(id)
+        const changes = this.getItemChanges(oldItem, item)
+        if (changes.length > 0) {
+          modified.push({ ...item, changes })
+        }
+      }
+    })
+
     return { added, removed, modified }
+  }
+
+  private flattenItems(items: any[], result: any[] = []): any[] {
+    items.forEach(item => {
+      result.push(item)
+      if (item.children) {
+        this.flattenItems(item.children, result)
+      }
+    })
+    return result
+  }
+
+  private getItemChanges(oldItem: any, newItem: any): string[] {
+    const changes: string[] = []
+
+    if (oldItem.method !== newItem.method) {
+      changes.push(`Method changed from ${oldItem.method} to ${newItem.method}`)
+    }
+    if (oldItem.url !== newItem.url) {
+      changes.push(`URL changed from "${oldItem.url}" to "${newItem.url}"`)
+    }
+    if (JSON.stringify(oldItem.headers) !== JSON.stringify(newItem.headers)) {
+      changes.push('Headers modified')
+    }
+    if (oldItem.body !== newItem.body) {
+      changes.push('Body modified')
+    }
+    if (JSON.stringify(oldItem.tests) !== JSON.stringify(newItem.tests)) {
+      changes.push('Tests modified')
+    }
+
+    return changes
   }
 
   private downloadFile(content: string, filename: string, mimeType: string): void {

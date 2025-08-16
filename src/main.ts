@@ -90,8 +90,8 @@ class PostmanDiffApp {
         })
       }
 
-      // Initialize differ with default options
-      this.differ = new PostmanDiffer(this.state.diffOptions)
+      // Initialize differ
+      this.differ = new PostmanDiffer()
 
       console.log('All components initialized successfully')
     } catch (error) {
@@ -173,7 +173,7 @@ class PostmanDiffApp {
   private async handleOptionsChange(options: DiffOptions): Promise<void> {
     try {
       this.state.diffOptions = options
-      this.differ = new PostmanDiffer(options)
+      this.differ = new PostmanDiffer()
       
       // Re-generate diff if both collections are loaded
       if (this.state.oldCollection && this.state.newCollection) {

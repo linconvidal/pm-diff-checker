@@ -139,20 +139,70 @@
   .dark .d2h-code-line {
     @apply bg-zinc-900 border-zinc-700;
   }
-
-  .dark .d2h-ins {
-    @apply bg-green-500/15 border-green-500;
+  
+  /* Unchanged lines should also be dark */
+  .dark .d2h-code-line-ctn {
+    @apply bg-zinc-900 text-zinc-300;
+  }
+  
+  .dark .d2h-code-line-prefix {
+    @apply bg-zinc-800 text-zinc-500;
+  }
+  
+  .dark .d2h-code-linenumber {
+    @apply bg-zinc-800 text-zinc-500;
+  }
+  
+  .dark .d2h-diff-tbody tr {
+    @apply bg-zinc-900;
+  }
+  
+  .dark .d2h-diff-tbody tr:hover {
+    @apply bg-zinc-800;
+  }
+  
+  .dark .d2h-file-diff {
+    @apply bg-zinc-900;
+  }
+  
+  .dark .d2h-file-side-diff {
+    @apply bg-zinc-900;
   }
 
-  .dark .d2h-del {
-    @apply bg-red-500/15 border-red-500;
+  .dark .d2h-ins, .dark tr.d2h-ins td {
+    @apply bg-green-500/20 border-green-500 text-green-300;
+  }
+
+  .dark .d2h-del, .dark tr.d2h-del td {
+    @apply bg-red-500/25 border-red-500 text-red-300;
+  }
+  
+  .dark .d2h-ins .d2h-code-line {
+    @apply bg-transparent;
+  }
+  
+  .dark .d2h-del .d2h-code-line {
+    @apply bg-transparent;
   }
 
   .dark .d2h-info {
     @apply bg-blue-500/15 border-blue-500 text-blue-400;
   }
+  
+  /* Context lines (unchanged code) */
+  .dark .d2h-cntx {
+    @apply bg-zinc-900 text-zinc-400;
+  }
+  
+  .dark .d2h-cntx .d2h-code-line {
+    @apply bg-transparent;
+  }
 
   /* Light mode overrides for diff2html */
+  .d2h-wrapper {
+    @apply bg-transparent;
+  }
+  
   .d2h-file-header {
     @apply bg-zinc-100 border-zinc-300 text-zinc-900;
   }
@@ -162,19 +212,83 @@
   }
 
   .d2h-code-line {
-    @apply bg-white border-zinc-300;
+    @apply bg-transparent border-zinc-300;
   }
 
-  .d2h-ins {
-    @apply bg-green-100 border-green-400;
+  .d2h-ins, tr.d2h-ins td {
+    @apply bg-green-100 border-green-400 text-green-900;
   }
 
-  .d2h-del {
-    @apply bg-red-100 border-red-400;
+  .d2h-del, tr.d2h-del td {
+    @apply bg-red-100 border-red-400 text-red-900;
+  }
+  
+  .d2h-ins .d2h-code-line {
+    @apply bg-transparent;
+  }
+  
+  .d2h-del .d2h-code-line {
+    @apply bg-transparent;
   }
 
   .d2h-info {
     @apply bg-blue-100 border-blue-400 text-blue-600;
+  }
+  
+  /* Context lines (unchanged code) in light mode */
+  .d2h-cntx {
+    @apply bg-transparent text-zinc-600;
+  }
+  
+  .d2h-cntx .d2h-code-line {
+    @apply bg-transparent;
+  }
+  
+  /* Light mode file diff containers */
+  .d2h-file-diff {
+    @apply bg-transparent;
+  }
+  
+  .d2h-file-side-diff {
+    @apply bg-transparent;
+  }
+  
+  .d2h-diff-tbody tr {
+    @apply bg-transparent;
+  }
+  
+  .d2h-code-line-ctn {
+    @apply bg-transparent;
+  }
+
+  /* Modified endpoint header */
+  .modified-endpoint-header {
+    @apply bg-yellow-50 dark:bg-yellow-900/20 p-3 my-2 border-l-4 border-yellow-500 text-zinc-900 dark:text-zinc-100;
+  }
+  
+  .path-hierarchy {
+    @apply text-zinc-500 dark:text-zinc-400 text-sm;
+  }
+  
+  .endpoint-info {
+    @apply text-zinc-600 dark:text-zinc-300 font-mono text-sm opacity-70;
+  }
+  
+  .change-summary {
+    @apply text-yellow-700 dark:text-yellow-400 text-sm font-semibold ml-2;
+  }
+  
+  /* Diff context controls */
+  .d2h-context-control {
+    @apply cursor-pointer select-none hover:bg-zinc-100 dark:hover:bg-zinc-800;
+  }
+
+  .d2h-context-control.expanded + .d2h-context-hidden {
+    display: table-row !important;
+  }
+
+  .d2h-context-hidden {
+    display: none;
   }
 }
 
