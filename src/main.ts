@@ -3,7 +3,6 @@ import {
   FileInputComponent, 
   DiffViewerComponent, 
   TreeViewComponent,
-  OptionTogglesComponent,
   ExportControlsComponent 
 } from './ui'
 import { PostmanDiffer, PostmanNormalizer } from './core'
@@ -31,7 +30,6 @@ class PostmanDiffApp {
     newFileInput: FileInputComponent
     diffViewer: DiffViewerComponent
     treeView: TreeViewComponent
-    optionToggles: OptionTogglesComponent
     exportControls: ExportControlsComponent
   } = {} as any
   private differ: PostmanDiffer = {} as any
@@ -82,11 +80,31 @@ class PostmanDiffApp {
           onNodeSelect: (node) => this.handleNodeSelection(node),
           onNodeToggle: (node) => this.handleNodeToggle(node)
         }),
-        optionToggles: new OptionTogglesComponent('option-toggles-container', {
-          onOptionsChange: (options) => this.handleOptionsChange(options)
-        }),
         exportControls: new ExportControlsComponent('export-controls-container', {
-          onExport: (format, data) => this.handleExport(format, data)
+          onExport: (format, data) => this.handleExport(format, data),
+          onImportFromPr: async (oldCollection, newCollection) => {
+            try {
+              this.setProcessing(true)
+              this.clearError()
+              if (oldCollection) {
+                this.state.oldCollection = oldCollection
+                this.state.normalizedOld = PostmanNormalizer.normalize(oldCollection)
+              } else {
+                this.state.oldCollection = null
+                this.state.normalizedOld = null
+              }
+              if (newCollection) {
+                this.state.newCollection = newCollection
+                this.state.normalizedNew = PostmanNormalizer.normalize(newCollection)
+              } else {
+                this.state.newCollection = null
+                this.state.normalizedNew = null
+              }
+              await this.tryGenerateDiff()
+            } finally {
+              this.setProcessing(false)
+            }
+          }
         })
       }
 
@@ -127,8 +145,7 @@ class PostmanDiffApp {
       this.handleFileLoad('new', collection)
     })
 
-    // Set initial options for toggles
-    this.components.optionToggles.setOptions(this.state.diffOptions)
+    // No comparison options UI; keep defaults in state
   }
 
   /**
@@ -167,22 +184,7 @@ class PostmanDiffApp {
     }
   }
 
-  /**
-   * Handle option changes
-   */
-  private async handleOptionsChange(options: DiffOptions): Promise<void> {
-    try {
-      this.state.diffOptions = options
-      this.differ = new PostmanDiffer()
-      
-      // Re-generate diff if both collections are loaded
-      if (this.state.oldCollection && this.state.newCollection) {
-        await this.tryGenerateDiff()
-      }
-    } catch (error) {
-      this.handleError('Failed to update options: ' + (error as Error).message)
-    }
-  }
+  // Comparison options UI removed; defaults remain in state
 
   /**
    * Handle tree node selection
@@ -273,7 +275,6 @@ class PostmanDiffApp {
     }
 
     // Disable/enable components during processing
-    this.components.optionToggles.setEnabled(!processing)
     this.components.exportControls.setEnabled(!processing)
   }
 
@@ -347,7 +348,6 @@ class PostmanDiffApp {
     this.initializeState()
     this.components.diffViewer.clear()
     this.components.treeView.clear()
-    this.components.optionToggles.setOptions(this.state.diffOptions)
     this.components.exportControls.updateData({})
     this.clearError()
     this.setProcessing(false)

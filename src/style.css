@@ -115,6 +115,21 @@
     @apply bg-green-500/15 text-green-500;
   }
 
+  /* Diff viewer layout helpers */
+  .diff-viewer .diff-header {
+    @apply flex items-center justify-between mb-4; /* clearer gap before sections */
+  }
+  .diff-viewer .diff-stats {
+    @apply flex gap-2; /* spacing between +/−/~ tags */
+  }
+  .diff-viewer,
+  .diff-viewer .diff-content {
+    min-width: 0; /* allow flex/grid to shrink this container */
+  }
+  .diff-viewer .diff-content {
+    @apply overflow-auto; /* prevent overflow outside viewport */
+  }
+
   .stat.removed {
     @apply bg-red-500/15 text-red-500;
   }
@@ -201,6 +216,8 @@
   /* Light mode overrides for diff2html */
   .d2h-wrapper {
     @apply bg-transparent;
+    max-width: 100%;
+    overflow-x: auto; /* prevent content growing page width */
   }
   
   .d2h-file-header {
@@ -213,6 +230,21 @@
 
   .d2h-code-line {
     @apply bg-transparent border-zinc-300;
+  }
+
+  /* Preserve indentation and monospace rendering */
+  .d2h-code-line,
+  .d2h-code-line-ctn {
+    white-space: pre; /* keep leading spaces */
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  /* Slimmer left number/prefix column for simple lists */
+  .d2h-code-linenumber {
+    width: 64px !important;   /* extra room to avoid crowding */
+    min-width: 64px !important;
+    text-align: right;
+    padding-right: 6px;
   }
 
   .d2h-ins, tr.d2h-ins td {
@@ -247,6 +279,24 @@
   /* Light mode file diff containers */
   .d2h-file-diff {
     @apply bg-transparent;
+    overflow-x: auto; /* contain long lines horizontally */
+    max-width: 100%;
+  }
+
+  /* Ensure diff table scrolls inside diff area instead of growing the page */
+  .right-panel,
+  .right-panel .panel-content,
+  #diff-container {
+    min-width: 0; /* critical for flex/grid overflow control */
+  }
+  .right-panel .panel-content {
+    overflow-x: auto;
+  }
+  .d2h-diff-table {
+    width: max-content; /* allow horizontal scroll for long lines */
+  }
+  .d2h-code-line-ctn {
+    max-width: 100%;
   }
   
   .d2h-file-side-diff {
@@ -259,6 +309,31 @@
   
   .d2h-code-line-ctn {
     @apply bg-transparent;
+  }
+
+  /* Ensure both old/new line number cells are visible in our custom table */
+  .d2h-diff-table td.d2h-code-linenumber {
+    display: table-cell !important;
+    visibility: visible !important;
+    vertical-align: top;
+    border-right: 1px solid rgba(0,0,0,0.08); /* subtle separator */
+  }
+  .dark .d2h-diff-table td.d2h-code-linenumber {
+    border-right: 1px solid rgba(255,255,255,0.12);
+  }
+
+  /* Subtle zebra striping for readability (overlays on base colors) */
+  /* Zebra striping only on neutral cells (not added/removed/info) */
+  .d2h-diff-tbody tr:nth-child(even) td:not(.d2h-ins):not(.d2h-del):not(.d2h-info) {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+  .dark .d2h-diff-tbody tr:nth-child(even) td:not(.d2h-ins):not(.d2h-del):not(.d2h-info) {
+    background-color: rgba(255, 255, 255, 0.04);
+  }
+  /* keep code content transparent over td background */
+  .d2h-diff-tbody tr:nth-child(even) td:not(.d2h-ins):not(.d2h-del):not(.d2h-info) .d2h-code-line,
+  .dark .d2h-diff-tbody tr:nth-child(even) td:not(.d2h-ins):not(.d2h-del):not(.d2h-info) .d2h-code-line {
+    background: transparent;
   }
 
   /* Modified endpoint header */
@@ -294,6 +369,7 @@
 
 /* Custom utilities */
 @layer utilities {
+  html, body, #app { overflow-x: hidden; }
   .text-gradient {
     background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
     -webkit-background-clip: text;

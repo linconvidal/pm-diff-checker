@@ -16,17 +16,17 @@ export class FileInputComponent {
 
   private createElement(label: string): HTMLElement {
     const wrapper = document.createElement('div')
-    wrapper.className = 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl p-6 transition-all duration-300 hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-lg'
+    wrapper.className = 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg p-3 transition-all duration-300 hover:border-blue-500 dark:hover:border-blue-400'
 
     wrapper.innerHTML = `
       <div class="flex flex-col gap-4">
-        <label class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">${label}</label>
+        <label class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">${label}</label>
         <input 
           type="file" 
           accept=".json" 
-          class="w-full p-6 border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded-lg bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 cursor-pointer transition-all duration-300 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+          class="w-full p-4 border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded-md bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 cursor-pointer transition-all duration-300 hover:border-blue-500 dark:hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
         />
-        <div class="file-status text-zinc-600 dark:text-zinc-400">No file selected</div>
+        <div class="file-status text-xs text-zinc-600 dark:text-zinc-400">No file selected</div>
       </div>
     `
 

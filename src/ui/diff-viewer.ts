@@ -19,7 +19,6 @@ export class DiffViewerComponent {
 
     wrapper.innerHTML = `
       <div class="diff-header">
-        <h2>Collection Diff</h2>
         <div class="diff-stats"></div>
       </div>
       <div class="diff-content">

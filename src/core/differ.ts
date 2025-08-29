@@ -218,9 +218,9 @@ export class PostmanDiffer {
       html += `<td class="d2h-code-linenumber ${cssClass}">${prefix}</td>`
       html += `<td class="${cssClass}"><div class="d2h-code-line">`
       
-      // Show consistent format for all items
+      // Show consistent format for all items (do not repeat +/− inside the content)
       if (diff.item.parentPath) {
-        html += `${prefix} ${this.escapeHtml(diff.item.parentPath)} › `
+        html += `${this.escapeHtml(diff.item.parentPath)} › `
       }
       html += `<strong>${this.escapeHtml(diff.item.name)}</strong>`
       
