@@ -7,22 +7,35 @@
     <title>Postman Collection Diff Viewer</title>
     <meta name="description" content="Compare two Postman collections and visualize the differences with GitHub-style diffs">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css">
-    <script type="module" crossorigin src="/pm-diff-checker/assets/index-nURw9XPm.js"></script>
-    <link rel="stylesheet" crossorigin href="/pm-diff-checker/assets/index-OTrdBT3I.css">
+    <!-- Critical overrides to remove diff2html's large inner paddings and side gaps -->
+    <style>
+      /* Remove the 8em/4.5em side paddings that create huge blanks */
+      .d2h-code-line, .d2h-code-side-line { padding: 0 !important; width: auto !important; display: inline-block !important; }
+      /* Prefix kept compact and inline */
+      .d2h-code-line-prefix { display: inline-block !important; width: 22px !important; min-width: 22px !important; max-width: 22px !important; }
+      /* Tight content container */
+      .d2h-code-line-ctn { padding-left: 6px !important; margin-left: 0 !important; white-space: pre !important; }
+      /* Ensure table doesn't split columns 50/50 */
+      .d2h-diff-table { table-layout: auto !important; }
+      /* Our compact line for custom sections */
+      .pm-code-line { display: block; padding: 1px 6px 1px 8px; white-space: pre; line-height: 20px; position: relative; z-index: 1; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+    </style>
+    <script type="module" crossorigin src="/pm-diff-checker/assets/index-BM-GISr4.js"></script>
+    <link rel="stylesheet" crossorigin href="/pm-diff-checker/assets/index-D0-0QCM7.css">
   </head>
-  <body class="min-h-screen bg-gradient-to-br from-zinc-50 to-white dark:from-zinc-900 dark:to-zinc-800 text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
+  <body class="min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
     <div id="app" class="min-h-screen">
       <div class="min-h-screen flex flex-col">
         <!-- Top Navigation Bar -->
-        <header class="sticky top-0 z-50 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-glass border-b border-zinc-200 dark:border-zinc-700 px-4 lg:px-8 py-1 transition-colors duration-300">
+        <header class="sticky top-0 z-50 bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 px-6 py-3">
           <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
             <div class="app-title">
-              <h1 class="text-base font-semibold text-gradient">Postman Collection Diff Viewer</h1>
+              <h1 class="text-lg font-medium text-zinc-900 dark:text-zinc-100">Postman Diff</h1>
             </div>
             
             <!-- Dark Mode Toggle -->
             <div class="flex items-center gap-2">
-              <button id="theme-toggle" class="p-1.5 rounded bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors duration-200" title="Toggle dark mode">
+              <button id="theme-toggle" class="p-2 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800" title="Toggle dark mode">
                  <svg class="w-5 h-5 hidden dark:block" fill="currentColor" viewBox="0 0 20 20">
                    <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
                  </svg>
@@ -35,7 +48,7 @@
         </header>
 
         <!-- Controls bar (compact) -->
-        <section class="px-4 lg:px-8 py-3 border-b border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 transition-colors duration-300">
+        <section class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
           <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-4 items-start">
             <div id="file-inputs-container" class="min-w-0"></div>
             <div id="export-controls-container"></div>
@@ -45,9 +58,9 @@
         <!-- Main Content Area -->
         <main class="flex-1 grid grid-cols-1 lg:grid-cols-[350px_1fr] xl:grid-cols-[400px_1fr] min-h-0">
           <!-- Left Sidebar -->
-          <aside class="bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-700 flex flex-col transition-colors duration-300">
-            <div class="bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-6 py-3 transition-colors duration-300">
-              <h2 class="font-semibold text-zinc-900 dark:text-zinc-100">Collection Structure</h2>
+          <aside class="bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 flex flex-col">
+            <div class="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 px-6 py-4">
+              <h2 class="text-sm font-medium text-zinc-600 dark:text-zinc-400 uppercase tracking-wide">Structure</h2>
             </div>
             <div class="flex-1 overflow-auto p-6">
               <div id="tree-view-container"></div>
@@ -55,12 +68,12 @@
           </aside>
 
           <!-- Right Panel -->
-          <section class="right-panel bg-white dark:bg-zinc-900 flex flex-col transition-colors duration-300">
-            <div class="bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-6 py-3 flex justify-between items-center transition-colors duration-300">
-              <h2 class="font-semibold text-zinc-900 dark:text-zinc-100">Diff Viewer</h2>
-              <div id="loading-indicator" class="hidden flex items-center gap-2 text-blue-500 text-sm">
+          <section class="right-panel bg-white dark:bg-zinc-950 flex flex-col">
+            <div class="bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 px-6 py-4 flex justify-between items-center">
+              <h2 class="text-sm font-medium text-zinc-600 dark:text-zinc-400 uppercase tracking-wide">Changes</h2>
+              <div id="loading-indicator" class="hidden flex items-center gap-2 text-zinc-600 dark:text-zinc-400 text-sm">
                 <span class="spinner"></span>
-                <span>Processing...</span>
+                <span>Processing</span>
               </div>
             </div>
             <div class="panel-content flex-1 overflow-auto p-3 min-w-0">
@@ -70,8 +83,8 @@
         </main>
 
         <!-- Footer -->
-        <footer class="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border-t border-zinc-200 dark:border-zinc-700 px-4 py-3 text-center transition-colors duration-300">
-          <p class="text-sm text-zinc-600 dark:text-zinc-400">Built with Vite + TypeScript | Powered by diff2html</p>
+        <footer class="bg-zinc-50 dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 px-6 py-3">
+          <p class="text-xs text-zinc-500 dark:text-zinc-500 text-center">Postman Collection Diff Viewer</p>
         </footer>
       </div>
     </div>

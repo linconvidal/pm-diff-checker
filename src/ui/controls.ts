@@ -65,7 +65,7 @@ export class ControlsComponent {
               </svg>
               Load from GitHub
             </button>
-            <div class="github-input-container" id="github-input-container" style="display: none;">
+            <div class="github-input-container" id="github-input-container">
               <input type="url" id="github-url" placeholder="https://github.com/user/repo/raw/main/collection.json" class="github-url-input" />
               <button id="github-load-submit" class="github-submit-btn">Load</button>
               <button id="github-cancel" class="github-cancel-btn">Cancel</button>
@@ -156,12 +156,12 @@ export class ControlsComponent {
     const githubUrl = this.element.querySelector('#github-url') as HTMLInputElement
 
     githubBtn.addEventListener('click', () => {
-      githubContainer.style.display = 'flex'
+      githubContainer.classList.add('is-visible')
       githubUrl.focus()
     })
 
     githubCancel.addEventListener('click', () => {
-      githubContainer.style.display = 'none'
+      githubContainer.classList.remove('is-visible')
       githubUrl.value = ''
     })
 
@@ -169,7 +169,7 @@ export class ControlsComponent {
       const url = githubUrl.value.trim()
       if (url) {
         this.events.onLoadFromGitHub?.(url)
-        githubContainer.style.display = 'none'
+        githubContainer.classList.remove('is-visible')
         githubUrl.value = ''
       }
     })

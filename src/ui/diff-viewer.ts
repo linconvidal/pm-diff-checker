@@ -38,9 +38,9 @@ export class DiffViewerComponent {
     // Show statistics with navigation
     const stats = this.calculateStats(diffResult)
     statsElement.innerHTML = `
-      <a href="#added-section" class="stat added" style="text-decoration: none; cursor: pointer;">+${stats.added} added</a>
-      <a href="#removed-section" class="stat removed" style="text-decoration: none; cursor: pointer;">-${stats.removed} removed</a>
-      <a href="#modified-section" class="stat modified" style="text-decoration: none; cursor: pointer;">~${stats.modified} modified</a>
+      <a href="#added-section" class="stat added stat-link">+${stats.added} added</a>
+      <a href="#removed-section" class="stat removed stat-link">-${stats.removed} removed</a>
+      <a href="#modified-section" class="stat modified stat-link">~${stats.modified} modified</a>
     `
 
     // Show diff HTML

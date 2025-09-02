@@ -42,23 +42,22 @@ export class TreeViewComponent {
 
   private createElement(): HTMLElement {
     const wrapper = document.createElement('div')
-    wrapper.className = 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden transition-colors duration-300'
+    wrapper.className = 'bg-white dark:bg-zinc-950'
 
     wrapper.innerHTML = `
-      <div class="bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-4 py-3 flex justify-between items-center transition-colors duration-300">
-        <h3 class="font-semibold text-zinc-900 dark:text-zinc-100">Collection Structure</h3>
-        <div class="flex gap-2">
-          <button class="tree-control-btn px-2 py-1 text-xs bg-transparent border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 rounded hover:bg-zinc-100 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-200" data-action="expand-all" title="Expand All">
-            <span class="icon">⊞</span>
+      <div class="flex justify-between items-center mb-2">
+        <div class="flex gap-1">
+          <button class="tree-control-btn p-1 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100" data-action="expand-all" title="Expand All">
+            <span class="font-mono">+</span>
           </button>
-          <button class="tree-control-btn px-2 py-1 text-xs bg-transparent border border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400 rounded hover:bg-zinc-100 dark:hover:bg-zinc-700 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors duration-200" data-action="collapse-all" title="Collapse All">
-            <span class="icon">⊟</span>
+          <button class="tree-control-btn p-1 text-xs text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100" data-action="collapse-all" title="Collapse All">
+            <span class="font-mono">−</span>
           </button>
         </div>
       </div>
-      <div class="max-h-96 overflow-y-auto p-2">
-        <div class="tree-placeholder text-center text-zinc-500 dark:text-zinc-400 py-8 italic">
-          Load collections to see structure
+      <div class="tree-content overflow-y-auto">
+        <div class="tree-placeholder text-sm text-zinc-500 dark:text-zinc-500 py-8">
+          No collections loaded
         </div>
       </div>
     `
@@ -297,10 +296,10 @@ export class TreeViewComponent {
 
 
   private render(): void {
-    const contentElement = this.element.querySelector('.max-h-96') as HTMLElement
+    const contentElement = this.element.querySelector('.tree-content') as HTMLElement
     
     if (this.tree.length === 0) {
-      contentElement.innerHTML = '<div class="tree-placeholder text-center text-zinc-500 dark:text-zinc-400 py-8 italic">Load collections to see structure</div>'
+      contentElement.innerHTML = '<div class="tree-placeholder text-sm text-zinc-500 dark:text-zinc-500 py-8">No collections loaded</div>'
       return
     }
 
@@ -314,34 +313,28 @@ export class TreeViewComponent {
   private renderNode(node: TreeNode, level: number): string {
     const hasChildren = node.children && node.children.length > 0
     const isExpanded = node.expanded
-    const selectedClass = node.selected ? 'bg-blue-100 dark:bg-blue-900/30' : 'hover:bg-zinc-100 dark:hover:bg-zinc-800'
+    const selectedClass = node.selected ? 'bg-zinc-100 dark:bg-zinc-800' : 'hover:bg-zinc-50 dark:hover:bg-zinc-900'
     const indent = level * 16
 
-    // Determine icon based on change type and node type
-    let icon = ''
-    let changeClass = ''
+    // Determine change type styling with clear labels
+    let changeIndicator = ''
+    let textColorClass = ''
     
-    if (node.type === 'collection') {
-      icon = '📊'
-      changeClass = 'text-blue-600 dark:text-blue-400'
-    } else if (node.type === 'folder') {
-      icon = '📁'
-      changeClass = 'text-zinc-600 dark:text-zinc-400'
-    } else if (node.changeType === 'added') {
-      changeClass = 'text-green-600 dark:text-green-400'
-      icon = '➕'
+    if (node.changeType === 'added') {
+      changeIndicator = '<span class="inline-block px-1.5 py-0.5 text-[10px] font-mono text-green-600 dark:text-green-400">+</span>'
+      textColorClass = ''
     } else if (node.changeType === 'removed') {
-      changeClass = 'text-red-600 dark:text-red-400'
-      icon = '➖'
+      changeIndicator = '<span class="inline-block px-1.5 py-0.5 text-[10px] font-mono text-red-600 dark:text-red-400">−</span>'
+      textColorClass = 'line-through opacity-60'
     } else if (node.changeType === 'modified') {
-      changeClass = 'text-yellow-600 dark:text-yellow-400'
-      icon = '🔄'
+      changeIndicator = '<span class="inline-block px-1.5 py-0.5 text-[10px] font-mono text-zinc-500 dark:text-zinc-400">●</span>'
+      textColorClass = ''
     }
 
     let toggleButton = ''
     if (hasChildren) {
       const toggleIcon = isExpanded ? '▼' : '▶'
-      toggleButton = `<button class="tree-toggle w-4 h-4 flex items-center justify-center text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 mr-2 text-xs transition-colors duration-200">${toggleIcon}</button>`
+      toggleButton = `<button class="tree-toggle w-3 h-4 flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 mr-1 text-[10px]">${toggleIcon}</button>`
     }
 
     // Show change details
@@ -350,15 +343,19 @@ export class TreeViewComponent {
       changeDetails = `<span class="text-xs text-zinc-500 dark:text-zinc-400 ml-2">(${(node as any).changeDetails})</span>`
     }
     
-    // Show method for endpoints
+    // Show type and method
     let methodBadge = ''
     if (node.type === 'request' && node.method) {
-      methodBadge = `<span class="text-xs font-mono text-zinc-600 dark:text-zinc-400 ml-2">[${node.method}]</span>`
+      const methodColor = node.method === 'GET' ? 'text-green-600' :
+                         node.method === 'POST' ? 'text-blue-600' :
+                         node.method === 'PUT' ? 'text-orange-600' :
+                         node.method === 'DELETE' ? 'text-red-600' : 'text-zinc-600'
+      methodBadge = `<span class="text-[10px] font-mono ${methodColor} dark:${methodColor.replace('600', '400')} ml-auto">${node.method}</span>`
     }
 
     let childrenHtml = ''
     if (hasChildren && isExpanded) {
-      childrenHtml = `<div class="border-l border-zinc-200 dark:border-zinc-700 ml-3">${this.renderNodes(node.children!, level + 1)}</div>`
+      childrenHtml = `<div class="border-l border-zinc-200 dark:border-zinc-800 ml-2">${this.renderNodes(node.children!, level + 1)}</div>`
     }
 
     // Create clickable link to section
@@ -367,11 +364,11 @@ export class TreeViewComponent {
                    node.changeType === 'modified' ? 'modified-section' : ''
 
     return `
-      <div class="tree-node my-0.5 rounded transition-colors duration-150 ${selectedClass}" data-node-id="${node.id}" data-section="${nodeId}">
-        <div class="flex items-center py-1 px-2 cursor-pointer min-h-[28px]" style="padding-left: ${indent + 8}px">
+      <div class="tree-node ${selectedClass}" data-node-id="${node.id}" data-section="${nodeId}">
+        <div class="flex items-center py-1 px-2 cursor-pointer group" data-indent="${indent}" style="--indent: ${indent}">
           ${toggleButton}
-          <span class="mr-2 text-sm flex-shrink-0 ${changeClass}">${icon}</span>
-          <span class="flex-1 text-zinc-900 dark:text-zinc-100 text-sm truncate">${node.name}</span>
+          ${changeIndicator ? `<span class="mr-2">${changeIndicator}</span>` : ''}
+          <span class="flex-1 text-sm ${textColorClass || 'text-zinc-900 dark:text-zinc-100'} ${node.type === 'folder' ? 'font-medium' : ''}">${node.name}</span>
           ${methodBadge}
           ${changeDetails}
         </div>

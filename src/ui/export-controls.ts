@@ -33,25 +33,22 @@ export class ExportControlsComponent {
 
   private createElement(): HTMLElement {
     const wrapper = document.createElement('div')
-    wrapper.className = 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden min-w-[200px] transition-colors duration-300'
+    wrapper.className = 'bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 p-4 min-w-[200px]'
 
     wrapper.innerHTML = `
-      <div class="bg-zinc-50 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 px-4 py-3 transition-colors duration-300">
-        <h3 class="font-semibold text-zinc-900 dark:text-zinc-100 text-sm">Export Results</h3>
-      </div>
-      <div class="p-4">
-        <div class="flex flex-col gap-2 mb-4">
-          <button class="export-btn flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 text-zinc-900 dark:text-zinc-100 px-3 py-2 rounded-md cursor-pointer transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed" data-format="markdown" title="Export as Markdown Report">
-            <span class="text-base">📄</span>
-            <span class="font-medium">Markdown Report</span>
+      <div>
+        <h3 class="text-xs font-medium text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-3">Export</h3>
+        <div class="flex flex-col gap-2 mb-3">
+          <button class="export-btn flex items-center gap-2 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 px-3 py-2 text-sm disabled:opacity-30 disabled:cursor-not-allowed" data-format="markdown" title="Export as Markdown Report">
+            <span class="font-mono text-xs">MD</span>
+            <span>Markdown</span>
           </button>
-          <button class="pr-fetch-btn flex items-center gap-2 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-blue-300 dark:border-blue-600 text-blue-700 dark:text-blue-300 px-3 py-2 rounded-md cursor-pointer transition-all duration-200 text-sm" title="Fetch collections from a GitHub PR">
-            <span class="text-base">🔎</span>
-            <span class="font-medium">Fetch from PR</span>
+          <button class="pr-fetch-btn flex items-center gap-2 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 px-3 py-2 text-sm" title="Fetch collections from a GitHub PR">
+            <span class="font-mono text-xs">PR</span>
+            <span>Fetch from PR</span>
           </button>
         </div>
-        <div class="export-status info text-zinc-600 dark:text-zinc-400 text-xs">
-          Ready to export when diff is available
+        <div class="export-status info text-xs">
         </div>
       </div>
     `
@@ -289,19 +286,19 @@ export class ExportControlsComponent {
   // --- GitHub PR Import ---
   private openPrModal(): void {
     const overlay = document.createElement('div')
-    overlay.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-[1000]'
+    overlay.className = 'fixed inset-0 bg-white/80 dark:bg-zinc-950/80 flex items-center justify-center z-[1000]'
 
     const modal = document.createElement('div')
-    modal.className = 'bg-white dark:bg-zinc-900 rounded-lg shadow-xl w-[95vw] max-w-xl p-4 border border-zinc-200 dark:border-zinc-700'
+    modal.className = 'bg-white dark:bg-zinc-950 w-[95vw] max-w-xl p-6 border border-zinc-200 dark:border-zinc-800'
     modal.innerHTML = `
-      <h3 class="text-lg font-semibold mb-3 text-zinc-900 dark:text-zinc-100">Fetch Collections from GitHub PR</h3>
-      <div class="space-y-3">
-        <input id="pr-url" type="url" placeholder="https://github.com/owner/repo/pull/123" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+      <h3 class="text-xs font-medium text-zinc-600 dark:text-zinc-400 uppercase tracking-wide mb-4">GitHub PR Import</h3>
+      <div class="space-y-4">
+        <input id="pr-url" type="url" placeholder="https://github.com/owner/repo/pull/123" class="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-blue-600"/>
         <div class="flex gap-2">
-          <button id="load-pr" class="px-3 py-2 bg-blue-600 text-white rounded disabled:opacity-50">Load</button>
-          <button id="cancel-pr" class="px-3 py-2 bg-zinc-200 dark:bg-zinc-700 rounded">Cancel</button>
+          <button id="load-pr" class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-30">Load</button>
+          <button id="cancel-pr" class="px-4 py-2 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800">Cancel</button>
         </div>
-        <div id="pr-status" class="text-sm text-zinc-600 dark:text-zinc-400"></div>
+        <div id="pr-status" class="text-xs text-zinc-600 dark:text-zinc-400"></div>
         <div id="pr-files" class="max-h-60 overflow-auto space-y-2"></div>
       </div>
     `
@@ -399,10 +396,10 @@ export class ExportControlsComponent {
           filesEl.innerHTML = candidates.map((c, idx) => {
             const oldName = c.oldCol?.info?.name || '—'
             const newName = c.newCol?.info?.name || '—'
-            return `<div class="flex items-center justify-between gap-2 p-2 border border-zinc-200 dark:border-zinc-700 rounded">`+
-                   `<div class="text-sm"><div class="font-medium">${c.path}</div>`+
-                   `<div class="text-zinc-500 dark:text-zinc-400">Old: ${oldName} · New: ${newName}</div></div>`+
-                   `<button data-idx="${idx}" class="select-pr px-3 py-1.5 bg-blue-600 text-white rounded">Select</button>`+
+            return `<div class="flex items-center justify-between gap-2 p-3 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">`+
+                   `<div class="text-sm"><div class="font-medium text-zinc-900 dark:text-zinc-100">${c.path}</div>`+
+                   `<div class="text-xs text-zinc-500 dark:text-zinc-400">Old: ${oldName} · New: ${newName}</div></div>`+
+                   `<button data-idx="${idx}" class="select-pr px-3 py-1.5 bg-blue-600 text-white hover:bg-blue-700">Select</button>`+
                    `</div>`
           }).join('')
 
@@ -431,7 +428,7 @@ export class ExportControlsComponent {
       
       if (type === 'success' || type === 'error') {
         setTimeout(() => {
-          statusElement.textContent = 'Ready to export when diff is available'
+          statusElement.textContent = ''
           statusElement.className = 'export-status'
         }, 3000)
       }
@@ -456,9 +453,9 @@ export class ExportControlsComponent {
     })
 
     if (hasData) {
-      this.showStatus('Ready to export', 'success')
+      this.showStatus('', 'success')
     } else {
-      this.showStatus('Ready to export when diff is available', 'info')
+      this.showStatus('', 'info')
     }
   }
 

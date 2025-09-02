@@ -16,17 +16,17 @@ export class FileInputComponent {
 
   private createElement(label: string): HTMLElement {
     const wrapper = document.createElement('div')
-    wrapper.className = 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-lg p-3 transition-all duration-300 hover:border-blue-500 dark:hover:border-blue-400'
+    wrapper.className = 'bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 p-4'
 
     wrapper.innerHTML = `
-      <div class="flex flex-col gap-4">
-        <label class="text-sm font-semibold text-zinc-900 dark:text-zinc-100">${label}</label>
+      <div class="flex flex-col gap-3">
+        <label class="text-xs font-medium text-zinc-600 dark:text-zinc-400 uppercase tracking-wide">${label}</label>
         <input 
           type="file" 
           accept=".json" 
-          class="w-full p-4 border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded-md bg-zinc-50 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 cursor-pointer transition-all duration-300 hover:border-blue-500 dark:hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+          class="w-full p-3 border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 cursor-pointer hover:bg-white dark:hover:bg-zinc-800 focus:outline-none focus:ring-1 focus:ring-blue-600" 
         />
-        <div class="file-status text-xs text-zinc-600 dark:text-zinc-400">No file selected</div>
+        <div class="file-status text-xs">No file selected</div>
       </div>
     `
 
@@ -46,12 +46,12 @@ export class FileInputComponent {
 
       this.loadFile(file)
         .then(collection => {
-          status.textContent = `✓ ${file.name}`
+          status.textContent = file.name
           status.className = 'file-status success'
           this.onFileLoad?.(collection)
         })
         .catch(error => {
-          status.textContent = `✗ Error: ${error.message}`
+          status.textContent = `Error: ${error.message}`
           status.className = 'file-status error'
         })
     })

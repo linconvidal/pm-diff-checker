@@ -225,7 +225,7 @@ export class PostmanDiffer {
       html += `<strong>${this.escapeHtml(diff.item.name)}</strong>`
       
       if (diff.item.method && diff.item.url) {
-        html += ` <span style="opacity: 0.7;">[${diff.item.method} ${this.escapeHtml(diff.item.url)}]</span>`
+        html += ` <span class="endpoint-info">[${diff.item.method} ${this.escapeHtml(diff.item.url)}]</span>`
       } else if (diff.item.children) {
         html += ' 📁'
       }
@@ -359,7 +359,7 @@ export class PostmanDiffer {
   private createBodyDiff(oldBody: string, newBody: string): string {
     if (!oldBody && !newBody) return ''
     
-    let html = '<tr><td colspan="2" style="background: #f8f8f8; padding: 4px; font-weight: bold;">Request Body:</td></tr>'
+    let html = '<tr><td colspan="2" class="bg-section-label">Request Body:</td></tr>'
     
     // Try to parse as JSON for better formatting
     let oldFormatted = oldBody
@@ -373,6 +373,10 @@ export class PostmanDiffer {
       if (newBody) newFormatted = JSON.stringify(JSON.parse(newBody), null, 2)
     } catch {}
     
+    // Dedent common leading spaces to reduce horizontal gap (display-only)
+    oldFormatted = this.removeCommonIndentFromMultiline(oldFormatted || '')
+    newFormatted = this.removeCommonIndentFromMultiline(newFormatted || '')
+
     // Use proper diff algorithm
     const changes = diffLines(oldFormatted || '', newFormatted || '')
     
@@ -387,18 +391,45 @@ export class PostmanDiffer {
   private createScriptDiff(scriptType: string, oldScript: string | string[], newScript: string | string[]): string {
     if (!oldScript && !newScript) return ''
     
-    let html = `<tr><td colspan="2" style="background: #f8f8f8; padding: 4px; font-weight: bold;">${scriptType}:</td></tr>`
+    let html = `<tr><td colspan="2" class="bg-section-label">${scriptType}:</td></tr>`
     
     // Convert to string if array
     const oldScriptStr = Array.isArray(oldScript) ? oldScript.join('\n') : (oldScript || '')
     const newScriptStr = Array.isArray(newScript) ? newScript.join('\n') : (newScript || '')
     
+    // Dedent common leading spaces to reduce horizontal gap (display-only)
+    const oldDedented = this.removeCommonIndentFromMultiline(oldScriptStr)
+    const newDedented = this.removeCommonIndentFromMultiline(newScriptStr)
+
     // Use proper diff algorithm
-    const changes = diffLines(oldScriptStr, newScriptStr)
+    const changes = diffLines(oldDedented, newDedented)
     
     html += this.renderDiffWithContext(changes, 3)
     
     return html
+  }
+
+  /**
+   * Removes common leading spaces across all non-empty lines of a multiline string.
+   * Visual-only normalization to reduce left indentation in rendered diffs.
+   */
+  private removeCommonIndentFromMultiline(text: string): string {
+    if (!text) return text
+    const lines = text.split('\n')
+    const nonEmpty = lines.filter(l => l.trim().length > 0)
+    if (nonEmpty.length === 0) return text
+    let common = Infinity
+    for (const line of nonEmpty) {
+      const match = line.match(/^[\t ]+/)
+      const count = match ? match[0].length : 0
+      common = Math.min(common, count)
+      if (common === 0) break
+    }
+    if (!isFinite(common) || common <= 0) return text
+    const sliceCount = common
+    return lines
+      .map(l => (l.match(/^[\t ]+/) ? l.slice(Math.min(sliceCount, (l.match(/^[\t ]+/)![0].length))) : l))
+      .join('\n')
   }
   
   /**
@@ -411,52 +442,51 @@ export class PostmanDiffer {
     
     changes.forEach((change) => {
       if (!change.added && !change.removed) {
-        // Unchanged lines - handle context
-        const lines = change.value.split('\n').filter(l => l !== '')
+        // Unchanged lines - handle context (trim common indent)
+        const rawLines = change.value.split('\n').filter(l => l !== '')
+        const lines = this.trimCommonIndent(rawLines)
         
         if (lines.length > contextLines * 2) {
           // Show first few lines of context
           for (let i = 0; i < contextLines; i++) {
             if (lines[i]) {
               html += '<tr>'
-              html += `<td class="d2h-code-linenumber" style="width: 40px; text-align: right; color: #999;">${oldLineNum++}</td>`
-              html += `<td class="d2h-code-linenumber" style="width: 40px; text-align: right; color: #999;">${newLineNum++}</td>`
+              html += `<td class="d2h-code-linenumber line-num-cell muted-text">${oldLineNum++}</td>`
               html += `<td><div class="d2h-code-line">${this.highlightCode(lines[i])}</div></td>`
               html += '</tr>'
+              newLineNum++
             }
           }
           
           // Add collapse indicator
           const hiddenCount = lines.length - (contextLines * 2)
           if (hiddenCount > 0) {
-            html += '<tr class="d2h-context-control">'
-            html += '<td class="d2h-code-linenumber" style="text-align: center;">...</td>'
-            html += '<td class="d2h-code-linenumber" style="text-align: center;">...</td>'
-            html += `<td><div class="d2h-code-line" style="color: #999; cursor: pointer;" onclick="this.parentElement.parentElement.classList.toggle('expanded')">`
-            html += `↕ ${hiddenCount} unchanged lines hidden (click to expand)`
-            html += '</div></td>'
+            const groupId = `ctx-${oldLineNum}-${newLineNum}-${Math.random().toString(36).slice(2,7)}`
+            html += `<tr class="d2h-context-control" data-group="${groupId}" onclick="(function(row){var open=row.classList.toggle('expanded');document.querySelectorAll('tr[data-group-content=\\'${groupId}\\']').forEach(function(r){r.style.display=open?'table-row':'none'});var caret=row.querySelector('.ctx-caret');var label=row.querySelector('.ctx-label');if(caret) caret.textContent=open?'▾':'▸';if(label) label.textContent=open?'Click to collapse':('${hiddenCount} unchanged lines hidden (click to expand)');})(this)">`
+            html += '<td class="d2h-code-linenumber align-center">...</td>'
+            html += `<td><div class="d2h-code-line clickable"><span class="ctx-caret">▸</span> <span class="ctx-label muted-text">${hiddenCount} unchanged lines hidden (click to expand)</span></div></td>`
             html += '</tr>'
             
-            // Hidden lines (shown when expanded)
-            html += '<tr class="d2h-context-hidden" style="display: none;">'
-            html += '<td colspan="3"><div style="max-height: 200px; overflow-y: auto;">'
+            // Hidden lines (as real table rows; initially hidden)
             for (let i = contextLines; i < lines.length - contextLines; i++) {
               if (lines[i]) {
-                html += `<div class="d2h-code-line"><span style="color: #999; margin-right: 10px;">${oldLineNum++}</span>${this.highlightCode(lines[i])}</div>`
+                html += `<tr class="d2h-context-hidden" data-group-content="${groupId}" style="display: none;">`
+                html += `<td class="d2h-code-linenumber line-num-cell muted-text">${oldLineNum++}</td>`
+                html += `<td><div class="d2h-code-line">${this.highlightCode(lines[i])}</div></td>`
+                html += '</tr>'
                 newLineNum++
               }
             }
-            html += '</div></td></tr>'
           }
           
           // Show last few lines of context
           for (let i = Math.max(0, lines.length - contextLines); i < lines.length; i++) {
             if (lines[i]) {
               html += '<tr>'
-              html += `<td class="d2h-code-linenumber" style="width: 40px; text-align: right; color: #999;">${oldLineNum++}</td>`
-              html += `<td class="d2h-code-linenumber" style="width: 40px; text-align: right; color: #999;">${newLineNum++}</td>`
+              html += `<td class="d2h-code-linenumber line-num-cell muted-text">${oldLineNum++}</td>`
               html += `<td><div class="d2h-code-line">${this.highlightCode(lines[i])}</div></td>`
               html += '</tr>'
+              newLineNum++
             }
           }
         } else {
@@ -464,30 +494,30 @@ export class PostmanDiffer {
           lines.forEach(line => {
             if (line) {
               html += '<tr>'
-              html += `<td class="d2h-code-linenumber" style="width: 40px; text-align: right; color: #999;">${oldLineNum++}</td>`
-              html += `<td class="d2h-code-linenumber" style="width: 40px; text-align: right; color: #999;">${newLineNum++}</td>`
+              html += `<td class="d2h-code-linenumber line-num-cell muted-text">${oldLineNum++}</td>`
               html += `<td><div class="d2h-code-line">${this.highlightCode(line)}</div></td>`
               html += '</tr>'
+              newLineNum++
             }
           })
         }
       } else if (change.removed) {
         // Removed lines
         const lines = change.value.split('\n').filter(l => l !== '')
-        lines.forEach(line => {
+        const trimmed = this.trimCommonIndent(lines)
+        trimmed.forEach(line => {
           html += '<tr class="d2h-del">'
-          html += `<td class="d2h-code-linenumber" style="width: 40px; text-align: right;">${oldLineNum++}</td>`
-          html += `<td class="d2h-code-linenumber" style="width: 40px; text-align: right; color: #999;">-</td>`
+          html += `<td class="d2h-code-linenumber line-num-cell">${oldLineNum++}</td>`
           html += `<td><div class="d2h-code-line">${this.highlightCode(line)}</div></td>`
           html += '</tr>'
         })
       } else if (change.added) {
         // Added lines
         const lines = change.value.split('\n').filter(l => l !== '')
-        lines.forEach(line => {
+        const trimmed = this.trimCommonIndent(lines)
+        trimmed.forEach(line => {
           html += '<tr class="d2h-ins">'
-          html += `<td class="d2h-code-linenumber" style="width: 40px; text-align: right; color: #999;">-</td>`
-          html += `<td class="d2h-code-linenumber" style="width: 40px; text-align: right;">${newLineNum++}</td>`
+          html += `<td class="d2h-code-linenumber line-num-cell">${newLineNum++}</td>`
           html += `<td><div class="d2h-code-line">${this.highlightCode(line)}</div></td>`
           html += '</tr>'
         })
@@ -516,6 +546,23 @@ export class PostmanDiffer {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;')
+  }
+
+  /**
+   * Trims common leading spaces from an array of non-empty lines.
+   */
+  private trimCommonIndent(lines: string[]): string[] {
+    const nonEmpty = lines.filter(l => l.trim().length > 0)
+    if (nonEmpty.length === 0) return lines
+    let common = Infinity
+    for (const l of nonEmpty) {
+      const m = l.match(/^ +/)
+      const n = m ? m[0].length : 0
+      common = Math.min(common, n)
+      if (common === 0) break
+    }
+    if (!isFinite(common) || common <= 0) return lines
+    return lines.map(l => (l.startsWith(' '.repeat(common)) ? l.slice(common) : l))
   }
 
 

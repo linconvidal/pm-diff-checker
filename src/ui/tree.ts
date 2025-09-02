@@ -93,7 +93,7 @@ export class TreeComponent {
             <span class="filter-label">Modified</span>
             <span class="filter-count">0</span>
           </div>
-          <button class="filter-clear" id="clear-filters" style="display: none;">
+          <button class="filter-clear" id="clear-filters">
             Clear Filters
           </button>
         </div>
@@ -154,7 +154,11 @@ export class TreeComponent {
 
   private updateClearButtonVisibility(): void {
     const clearBtn = this.element.querySelector('#clear-filters') as HTMLElement
-    clearBtn.style.display = this.activeFilters.size > 0 ? 'block' : 'none'
+    if (this.activeFilters.size > 0) {
+      clearBtn.classList.add('is-visible')
+    } else {
+      clearBtn.classList.remove('is-visible')
+    }
   }
 
   private calculateStats(nodes: TreeNode[]): TreeStats {

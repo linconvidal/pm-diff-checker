@@ -6,113 +6,113 @@
 @layer components {
   /* Spinner animation */
   .spinner {
-    @apply w-4 h-4 border-2 border-transparent border-t-blue-500 rounded-full animate-spin;
+    @apply w-4 h-4 border-2 border-transparent border-t-zinc-600 dark:border-t-zinc-400 rounded-full animate-spin;
   }
 
-  /* Method badges with proper colors */
+  /* Method badges - minimal style */
   .method-badge {
-    @apply px-2 py-1 rounded text-xs font-semibold uppercase text-white min-w-[40px] text-center;
+    @apply px-2 py-0.5 text-xs font-mono uppercase min-w-[40px] text-center;
   }
 
   .method-badge.get {
-    @apply bg-green-600;
+    @apply text-green-700 dark:text-green-400;
   }
 
   .method-badge.post {
-    @apply bg-blue-600;
+    @apply text-blue-700 dark:text-blue-400;
   }
 
   .method-badge.put {
-    @apply bg-orange-600;
+    @apply text-orange-700 dark:text-orange-400;
   }
 
   .method-badge.patch {
-    @apply bg-purple-600;
+    @apply text-purple-700 dark:text-purple-400;
   }
 
   .method-badge.delete {
-    @apply bg-red-600;
+    @apply text-red-700 dark:text-red-400;
   }
 
-  /* Change indicators */
+  /* Change indicators - minimal */
   .change-indicator {
-    @apply ml-2 px-2 py-1 rounded text-xs font-bold;
+    @apply ml-2 text-xs font-mono;
   }
 
   .change-indicator.change-added {
-    @apply bg-green-900/20 text-green-400 dark:bg-green-500/20 dark:text-green-300;
+    @apply text-green-600 dark:text-green-400;
   }
 
   .change-indicator.change-removed {
-    @apply bg-red-900/20 text-red-400 dark:bg-red-500/20 dark:text-red-300;
+    @apply text-red-600 dark:text-red-400;
   }
 
   .change-indicator.change-modified {
-    @apply bg-yellow-900/20 text-yellow-400 dark:bg-yellow-500/20 dark:text-yellow-300;
+    @apply text-yellow-600 dark:text-yellow-400;
   }
 
-  /* Custom toggle switch */
+  /* Custom toggle switch - minimal */
   .toggle-switch {
-    @apply relative w-11 h-6 bg-zinc-600 rounded-full transition-colors duration-200 flex-shrink-0;
+    @apply relative w-10 h-5 bg-zinc-200 dark:bg-zinc-700 rounded-sm flex-shrink-0;
   }
 
   .toggle-switch.checked {
-    @apply bg-green-600;
+    @apply bg-blue-600;
   }
 
   .toggle-slider {
-    @apply absolute top-0.5 left-0.5 w-5 h-5 bg-zinc-400 rounded-full transition-all duration-200;
+    @apply absolute top-0.5 left-0.5 w-4 h-4 bg-white dark:bg-zinc-300 rounded-sm transition-transform;
   }
 
   .toggle-switch.checked .toggle-slider {
-    @apply translate-x-5 bg-white;
+    @apply translate-x-5;
   }
 
-  /* File status styles */
+  /* File status styles - minimal */
   .file-status {
-    @apply text-sm px-3 py-2 rounded-md text-center border transition-colors duration-200;
+    @apply text-sm text-zinc-600 dark:text-zinc-400;
   }
 
   .file-status.loading {
-    @apply bg-yellow-500/10 text-yellow-500 border-yellow-500/30;
+    @apply text-zinc-600 dark:text-zinc-400;
   }
 
   .file-status.success {
-    @apply bg-green-500/10 text-green-500 border-green-500/30;
+    @apply text-green-600 dark:text-green-400;
   }
 
   .file-status.error {
-    @apply bg-red-500/10 text-red-500 border-red-500/30;
+    @apply text-red-600 dark:text-red-400;
   }
 
-  /* Export status styles */
+  /* Export status styles - minimal */
   .export-status {
-    @apply text-sm px-3 py-2 rounded text-center;
+    @apply text-sm;
   }
 
   .export-status.loading {
-    @apply bg-yellow-500/10 text-yellow-500 border border-yellow-500/30;
+    @apply text-zinc-600 dark:text-zinc-400;
   }
 
   .export-status.success {
-    @apply bg-green-500/10 text-green-500 border border-green-500/30;
+    @apply text-green-600 dark:text-green-400;
   }
 
   .export-status.error {
-    @apply bg-red-500/10 text-red-500 border border-red-500/30;
+    @apply text-red-600 dark:text-red-400;
   }
 
   .export-status.info {
     @apply text-zinc-500 dark:text-zinc-400;
   }
 
-  /* Stats badges */
+  /* Stats badges - minimal */
   .stat {
-    @apply px-3 py-1 rounded-full text-xs font-semibold;
+    @apply text-xs font-mono;
   }
 
   .stat.added {
-    @apply bg-green-500/15 text-green-500;
+    @apply text-green-600 dark:text-green-400;
   }
 
   /* Diff viewer layout helpers */
@@ -131,11 +131,11 @@
   }
 
   .stat.removed {
-    @apply bg-red-500/15 text-red-500;
+    @apply text-red-600 dark:text-red-400;
   }
 
   .stat.modified {
-    @apply bg-yellow-500/15 text-yellow-500;
+    @apply text-yellow-600 dark:text-yellow-400;
   }
 
   /* Dark mode overrides for diff2html */
@@ -145,6 +145,8 @@
 
   .dark .d2h-file-header {
     @apply bg-zinc-800 border-zinc-700 text-zinc-100;
+    border-top: 1px solid #30363d !important;
+    border-bottom: 1px solid #30363d !important;
   }
 
   .dark .d2h-file-header:hover {
@@ -161,7 +163,9 @@
   }
   
   .dark .d2h-code-line-prefix {
-    @apply bg-zinc-800 text-zinc-500;
+    background: rgb(24 24 27);
+    color: rgb(156 163 175);
+    border-right: 1px solid rgb(63 63 70);
   }
   
   .dark .d2h-code-linenumber {
@@ -184,12 +188,38 @@
     @apply bg-zinc-900;
   }
 
-  .dark .d2h-ins, .dark tr.d2h-ins td {
-    @apply bg-green-500/20 border-green-500 text-green-300;
+  /* Dark mode - STRONG GREEN */
+  .dark .d2h-ins {
+    background-color: #1a3a1f !important;
+  }
+  .dark .d2h-ins .d2h-code-line-prefix {
+    color: #56d364 !important;
+    background-color: #1a3a1f !important;
+  }
+  .dark .d2h-ins .d2h-code-linenumber {
+    background-color: #1a3a1f !important;
+  }
+  
+  .dark .d2h-ins .d2h-code-line-prefix {
+    color: rgb(74 222 128);
+    font-weight: bold;
   }
 
-  .dark .d2h-del, .dark tr.d2h-del td {
-    @apply bg-red-500/25 border-red-500 text-red-300;
+  /* Dark mode - STRONG RED */
+  .dark .d2h-del {
+    background-color: #3d1418 !important;
+  }
+  .dark .d2h-del .d2h-code-line-prefix {
+    color: #f85149 !important;
+    background-color: #3d1418 !important;
+  }
+  .dark .d2h-del .d2h-code-linenumber {
+    background-color: #3d1418 !important;
+  }
+  
+  .dark .d2h-del .d2h-code-line-prefix {
+    color: rgb(248 113 113);
+    font-weight: bold;
   }
   
   .dark .d2h-ins .d2h-code-line {
@@ -204,13 +234,18 @@
     @apply bg-blue-500/15 border-blue-500 text-blue-400;
   }
   
-  /* Context lines (unchanged code) */
+  /* Dark mode - context lines (unchanged code) */
   .dark .d2h-cntx {
-    @apply bg-zinc-900 text-zinc-400;
+    background: transparent;
   }
   
-  .dark .d2h-cntx .d2h-code-line {
-    @apply bg-transparent;
+  .dark .d2h-cntx .d2h-code-line-ctn {
+    color: rgb(156 163 175);
+    background: transparent;
+  }
+  
+  .dark .d2h-cntx .d2h-code-line-prefix {
+    color: rgb(107 114 128);
   }
 
   /* Light mode overrides for diff2html */
@@ -222,6 +257,9 @@
   
   .d2h-file-header {
     @apply bg-zinc-100 border-zinc-300 text-zinc-900;
+    padding: 4px 8px !important;
+    margin: 0 !important;
+    font-size: 12px !important;
   }
 
   .d2h-file-header:hover {
@@ -237,22 +275,68 @@
   .d2h-code-line-ctn {
     white-space: pre; /* keep leading spaces */
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    tab-size: 2;
+    -moz-tab-size: 2;
   }
 
-  /* Slimmer left number/prefix column for simple lists */
+  /* FIXED: Line numbers - compact and NO OVERLAP */
   .d2h-code-linenumber {
-    width: 64px !important;   /* extra room to avoid crowding */
-    min-width: 64px !important;
-    text-align: right;
-    padding-right: 6px;
+    width: 28px !important;
+    min-width: 28px !important;
+    max-width: 28px !important;
+    padding: 0 2px 0 0 !important;
+    text-align: right !important;
+    font-size: 11px !important;
+    font-family: monospace !important;
+    color: #999 !important;
+    background: #fafafa !important;
+    border-right: 1px solid #ddd !important;
+    vertical-align: top !important;
+  }
+  
+  .dark .d2h-code-linenumber {
+    color: #6e7681 !important;
+    background: #161b22 !important;
+    border-right: 1px solid #30363d !important;
+  }
+  
+  /* FIXED: Prefix column - NO OVERLAP */
+  .d2h-code-line-prefix {
+    width: 14px !important;
+    min-width: 14px !important;
+    max-width: 14px !important;
+    padding: 0 !important;
+    text-align: center !important;
+    font-family: monospace !important;
+    font-weight: bold !important;
+    background: #fafafa !important;
+    border-right: 1px solid #ddd !important;
+    vertical-align: top !important;
+    display: inline-block !important;
   }
 
-  .d2h-ins, tr.d2h-ins td {
-    @apply bg-green-100 border-green-400 text-green-900;
+  /* STRONG GREEN for added lines */
+  .d2h-ins {
+    background-color: #d4f4dd !important;
+  }
+  .d2h-ins .d2h-code-line-prefix {
+    color: #22863a !important;
+    background-color: #d4f4dd !important;
+  }
+  .d2h-ins .d2h-code-linenumber {
+    background-color: #d4f4dd !important;
   }
 
-  .d2h-del, tr.d2h-del td {
-    @apply bg-red-100 border-red-400 text-red-900;
+  /* STRONG RED for removed lines */
+  .d2h-del {
+    background-color: #ffdce0 !important;
+  }
+  .d2h-del .d2h-code-line-prefix {
+    color: #cb2431 !important;
+    background-color: #ffdce0 !important;
+  }
+  .d2h-del .d2h-code-linenumber {
+    background-color: #ffdce0 !important;
   }
   
   .d2h-ins .d2h-code-line {
@@ -269,11 +353,16 @@
   
   /* Context lines (unchanged code) in light mode */
   .d2h-cntx {
-    @apply bg-transparent text-zinc-600;
+    background: transparent;
   }
   
-  .d2h-cntx .d2h-code-line {
-    @apply bg-transparent;
+  .d2h-cntx .d2h-code-line-ctn {
+    color: rgb(75 85 99);
+    background: transparent;
+  }
+  
+  .d2h-cntx .d2h-code-line-prefix {
+    color: rgb(156 163 175);
   }
   
   /* Light mode file diff containers */
@@ -293,7 +382,17 @@
     overflow-x: auto;
   }
   .d2h-diff-table {
-    width: max-content; /* allow horizontal scroll for long lines */
+    width: 100%;
+    margin: 0 !important;
+  }
+  
+  /* REMOVE EXCESSIVE SPACING */
+  .d2h-file-wrapper {
+    margin: 0 0 8px 0 !important;
+  }
+  
+  .d2h-wrapper {
+    padding: 0 !important;
   }
   .d2h-code-line-ctn {
     max-width: 100%;
@@ -322,23 +421,108 @@
     border-right: 1px solid rgba(255,255,255,0.12);
   }
 
-  /* Subtle zebra striping for readability (overlays on base colors) */
-  /* Zebra striping only on neutral cells (not added/removed/info) */
-  .d2h-diff-tbody tr:nth-child(even) td:not(.d2h-ins):not(.d2h-del):not(.d2h-info) {
-    background-color: rgba(0, 0, 0, 0.02);
+  /* Subtle zebra striping for readability (unchanged rows only) */
+  .d2h-diff-tbody tr:not(.d2h-ins):not(.d2h-del):not(.d2h-context-control):not(.d2h-context-hidden):nth-child(odd) td {
+    background: rgba(0,0,0,0.03);
   }
-  .dark .d2h-diff-tbody tr:nth-child(even) td:not(.d2h-ins):not(.d2h-del):not(.d2h-info) {
-    background-color: rgba(255, 255, 255, 0.04);
+  .dark .d2h-diff-tbody tr:not(.d2h-ins):not(.d2h-del):not(.d2h-context-control):not(.d2h-context-hidden):nth-child(odd) td {
+    background: rgba(255,255,255,0.04);
   }
-  /* keep code content transparent over td background */
-  .d2h-diff-tbody tr:nth-child(even) td:not(.d2h-ins):not(.d2h-del):not(.d2h-info) .d2h-code-line,
-  .dark .d2h-diff-tbody tr:nth-child(even) td:not(.d2h-ins):not(.d2h-del):not(.d2h-info) .d2h-code-line {
-    background: transparent;
+  
+  /* Fix table layout */
+  .d2h-diff-table {
+    table-layout: fixed;
+    border-spacing: 0;
+    width: 100%;
+  }
+  
+  /* Ensure proper column widths */
+  .d2h-diff-table td {
+    overflow: hidden;
+  }
+  
+  /* Neutralize paddings and make code line fill the cell width */
+  .d2h-code-line,
+  .d2h-code-side-line {
+    display: block !important;
+    padding: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+  }
+  /* Ensure no inner element paints a separate background block */
+  .d2h-code-line,
+  .d2h-code-line-ctn,
+  .d2h-code-side-line {
+    background: transparent !important;
+  }
+  
+  /* Code content - NO EXTRA SPACING */
+  /* First, kill any unintended left spacing */
+  .d2h-code-line-ctn {
+    padding-left: 0 !important;
+    margin-left: 0 !important;
+    white-space: pre !important;
+    word-wrap: normal !important;
+    vertical-align: top !important;
   }
 
-  /* Modified endpoint header */
+  /* Then add back minimal, tight padding */
+  .d2h-code-line-ctn {
+    padding-left: 0px !important;
+  }
+
+  /* Ensure the last cell (code cell) has no extra left padding */
+  .d2h-code-line td:last-child {
+    padding-left: 0 !important;
+  }
+  
+  /* Remove empty cells more carefully */
+  .d2h-diff-table td.d2h-emptyplaceholder {
+    display: none !important;
+  }
+  
+  /* Keep side line numbers visible */
+  .d2h-code-side-linenumber {
+    border-right: 1px solid rgb(229 231 235);
+    vertical-align: top;
+  }
+  
+  .dark .d2h-code-side-linenumber {
+    border-right: 1px solid rgb(39 39 42);
+  }
+  
+  /* Fix line number display issues */
+  .d2h-linenumber {
+    display: inline-block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* COMPACT table structure */
+  .d2h-diff-tbody td {
+    vertical-align: top !important;
+    padding: 0 !important;
+    line-height: 18px !important;
+    font-size: 12px !important;
+  }
+  
+  /* Code lines - COMPACT height */
+  .d2h-code-line {
+    min-height: 18px !important;
+    line-height: 18px !important;
+  }
+
+  /* Modified endpoint header - minimal style */
   .modified-endpoint-header {
-    @apply bg-yellow-50 dark:bg-yellow-900/20 p-3 my-2 border-l-4 border-yellow-500 text-zinc-900 dark:text-zinc-100;
+    @apply bg-zinc-50 dark:bg-zinc-900 p-2 my-1 border-l-2 border-zinc-400 text-zinc-900 dark:text-zinc-100;
+  }
+
+  /* Stronger separation for endpoint title in dark mode */
+  .dark .modified-endpoint-header {
+    border-left-color: #a1a1aa; /* zinc-400 → a bit brighter */
+    border-top: 1px solid #30363d;
+    border-bottom: 1px solid #30363d;
+    background-color: #0f0f11; /* slightly darker than diff area */
   }
   
   .path-hierarchy {
@@ -365,20 +549,126 @@
   .d2h-context-hidden {
     display: none;
   }
+
+  /* Inline-style replacements from differ.ts */
+  .muted-text {
+    color: #999;
+  }
+  .clickable {
+    cursor: pointer;
+  }
+  .bg-section-label {
+    background: #f8f8f8;
+    padding: 4px;
+    font-weight: bold;
+  }
+  .dark .bg-section-label {
+    background: #18181b; /* zinc-900-ish */
+    color: #e5e7eb;
+    border-top: 1px solid #30363d;
+    border-bottom: 1px solid #30363d;
+  }
+  .line-num-cell {
+    width: 40px;
+    text-align: right;
+  }
+  .context-hidden-row {
+    display: none;
+  }
+  .context-hidden-container {
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .line-num-inline {
+    color: #999;
+    margin-right: 10px;
+  }
+
+  .align-center {
+    text-align: center;
+  }
+
+  .stat-link {
+    text-decoration: none;
+  }
+
+  /* Controls visibility helpers */
+  .github-input-container {
+    display: none;
+    gap: 8px;
+    align-items: center;
+  }
+  .github-input-container.is-visible {
+    display: flex;
+  }
+
+  .filter-clear {
+    display: none;
+  }
+  .filter-clear.is-visible {
+    display: inline-block;
+  }
+
+  /* Tree view indentation helper (JS sets --indent on element) */
+  .tree-node .group[data-indent] {
+    padding-left: calc(var(--indent, 0) * 1px + 8px);
+  }
+
+  /* Diff table - minimal, stable two-columns layout */
+  .d2h-diff-table {
+    table-layout: fixed;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  .d2h-diff-table td {
+    padding: 0;
+    border: none;
+    vertical-align: top;
+  }
+  .d2h-diff-table td.d2h-code-linenumber {
+    width: 32px;
+    min-width: 32px;
+    max-width: 32px;
+    text-align: right;
+    padding-right: 6px;
+    font-size: 11px;
+  }
+  .d2h-diff-table td:last-child {
+    width: auto;
+  }
+  
+  /* Section headers */
+  .d2h-diff-table td[colspan="2"] {
+    width: 100% !important;
+    padding: 4px !important;
+    text-align: left !important;
+  }
+  
+  /* Context control styling */
+  .d2h-context-control {
+    background-color: rgba(0,0,0,0.05) !important;
+  }
+  
+  .d2h-context-control td {
+    padding: 2px 4px !important;
+    font-size: 11px !important;
+    color: #666 !important;
+    text-align: center !important;
+  }
+
+  .d2h-context-control.expanded td {
+    background-color: rgba(0,0,0,0.08) !important;
+  }
+
+  .dark .d2h-context-control {
+    background-color: rgba(255,255,255,0.03) !important;
+  }
+  .dark .d2h-context-control.expanded td {
+    background-color: rgba(255,255,255,0.06) !important;
+  }
 }
 
 /* Custom utilities */
 @layer utilities {
   html, body, #app { overflow-x: hidden; }
-  .text-gradient {
-    background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .backdrop-blur-glass {
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-  }
 }
